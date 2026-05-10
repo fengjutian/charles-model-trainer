@@ -1,5 +1,5 @@
 from datasets import load_dataset
-from transformers import AutoTokenizer, AutoModelForCausalLM, TrainingArguments
+from transformers import AutoTokenizer, AutoModelForCausalLM, TrainingArguments, BitsAndBytesConfig
 from peft import LoraConfig
 from trl import SFTTrainer
 
@@ -8,11 +8,18 @@ MODEL_NAME = "Qwen/Qwen3.5-0.8B"
 dataset = load_dataset("json", data_files="dataset.jsonl", split="train")
 
 tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME, trust_remote_code=True)
+quantization_config = BitsAndBytesConfig(
+    load_in_4bit=True,
+    bnb_4bit_compute_dtype="float16",
+    bnb_4bit_use_double_quant=True,
+    bnb_4bit_quant_type="nf4",
+)
 model = AutoModelForCausalLM.from_pretrained(
     MODEL_NAME,
-    load_in_4bit=True,
+    quantization_config=quantization_config,
     device_map="auto",
     trust_remote_code=True,
+    max_memory={0: "4GB"},
 )
 
 peft_config = LoraConfig(
