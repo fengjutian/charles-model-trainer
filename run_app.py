@@ -1,3 +1,4 @@
+
 # -*- coding: utf-8 -*-
 # run_app.py - 启动 Web 界面的脚本
 
@@ -26,9 +27,14 @@ def main():
     print()
     print("按 Ctrl+C 停止服务")
     print("-" * 50)
+    print()
     
     # 启动 app.py
     os.system("python app.py")
+    
+    # 保持窗口
+    print("\n按 Enter 退出...")
+    input()
 
 if __name__ == "__main__":
     main()

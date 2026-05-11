@@ -77,10 +77,13 @@ def respond(message, history, system_prompt, temperature, top_p, max_tokens):
     # 构建消息列表
     messages = [{"role": "system", "content": system_prompt}]
     
-    # 添加历史对话（使用字典格式）
-    for user_msg, assistant_msg in history:
-        messages.append({"role": "user", "content": user_msg})
-        messages.append({"role": "assistant", "content": assistant_msg})
+    # 添加历史对话（兼容元组和字典格式）
+    for item in history:
+        if isinstance(item, dict):
+            messages.append({"role": item["role"], "content": item["content"]})
+        elif isinstance(item, (list, tuple)) and len(item) == 2:
+            messages.append({"role": "user", "content": item[0]})
+            messages.append({"role": "assistant", "content": item[1]})
     
     # 添加当前消息
     messages.append({"role": "user", "content": message})
@@ -88,9 +91,8 @@ def respond(message, history, system_prompt, temperature, top_p, max_tokens):
     # 获取回复
     response = chat_with_model(messages, temperature, top_p, max_tokens)
     
-    # 更新对话历史（使用字典格式）
-    history.append({"role": "user", "content": message})
-    history.append({"role": "assistant", "content": response})
+    # 更新对话历史（使用元组格式）
+    history.append((message, response))
     return history, ""
 
 # ============================================================
@@ -164,9 +166,16 @@ with demo:
 # ============================================================
 
 if __name__ == "__main__":
-    print("\n🌐 启动 Web 界面...")
-    print("📍 访问地址: http://127.0.0.1:7860")
-    print("📍 或者访问: http://localhost:7860")
-    print("\n按 Ctrl+C 停止服务器\n")
-
-    demo.launch(server_name="127.0.0.1", server_port=7860)
+    import traceback
+    
+    try:
+        print("\n🌐 启动 Web 界面...")
+        print("📍 访问地址: http://127.0.0.1:7860")
+        print("📍 或者访问: http://localhost:7860")
+        print("\n按 Ctrl+C 停止服务器\n")
+        
+        demo.launch(server_name="127.0.0.1", server_port=7860, inbrowser=True)
+    except Exception as e:
+        print("\n❌ 发生错误:")
+        traceback.print_exc()
+        input("\n按 Enter 退出...")
