@@ -77,7 +77,7 @@ def respond(message, history, system_prompt, temperature, top_p, max_tokens):
     # 构建消息列表
     messages = [{"role": "system", "content": system_prompt}]
     
-    # 添加历史对话（兼容元组和字典格式）
+    # 添加历史对话
     for item in history:
         if isinstance(item, dict):
             messages.append({"role": item["role"], "content": item["content"]})
@@ -91,9 +91,19 @@ def respond(message, history, system_prompt, temperature, top_p, max_tokens):
     # 获取回复
     response = chat_with_model(messages, temperature, top_p, max_tokens)
     
-    # 更新对话历史（使用元组格式）
-    history.append((message, response))
-    return history, ""
+    # 更新对话历史（使用字典格式）
+    new_history = []
+    for item in history:
+        if isinstance(item, dict):
+            new_history.append(item)
+        elif isinstance(item, (list, tuple)) and len(item) == 2:
+            new_history.append({"role": "user", "content": item[0]})
+            new_history.append({"role": "assistant", "content": item[1]})
+    
+    new_history.append({"role": "user", "content": message})
+    new_history.append({"role": "assistant", "content": response})
+    
+    return new_history, ""
 
 # ============================================================
 # 启动 Gradio
