@@ -33,11 +33,10 @@ model = AutoModelForCausalLM.from_pretrained(
 )
 
 def tokenize_function(examples):
-    messages = examples["messages"]
     texts = []
-    for msg in messages:
+    for messages in examples["messages"]:
         text = ""
-        for m in msg:
+        for m in messages:
             role = m["role"]
             content = m["content"]
             if role == "system":
@@ -46,10 +45,10 @@ def tokenize_function(examples):
                 text += f"<|im_start|>user\n{content}<|im_end|>\n"
             elif role == "assistant":
                 text += f"<|im_start|>assistant\n{content}<|im_end|>\n"
-    texts.append(text)
-    return tokenizer(texts, padding="max_length", truncation=True, max_length=512)
+        texts.append(text)
+    return tokenizer(texts, padding="max_length", truncation=True, max_length=256)
 
-tokenized_dataset = dataset.map(tokenize_function, batched=False, remove_columns=["messages"])
+tokenized_dataset = dataset.map(tokenize_function, batched=True, remove_columns=["messages"])
 
 lora_config = LoraConfig(
     r=16,
@@ -60,14 +59,15 @@ lora_config = LoraConfig(
 )
 
 model = get_peft_model(model, lora_config)
+model.gradient_checkpointing_enable()
 model.print_trainable_parameters()
 
 data_collator = DataCollatorForLanguageModeling(tokenizer=tokenizer, mlm=False)
 
 args = TrainingArguments(
     output_dir="./qwen-lora",
-    per_device_train_batch_size=4,
-    gradient_accumulation_steps=8,
+    per_device_train_batch_size=1,
+    gradient_accumulation_steps=32,
     learning_rate=2e-4,
     num_train_epochs=3,
     logging_steps=1,
