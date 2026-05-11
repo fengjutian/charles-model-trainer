@@ -1,6 +1,5 @@
 .venv
-
-# qwen-lora
+qwen-lora
 
 torch-2.6.0+cu124-cp312-cp312-win_amd64.whl
 torchaudio-2.6.0+cu124-cp312-cp312-win_amd64.whl

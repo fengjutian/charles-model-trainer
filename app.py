@@ -169,7 +169,7 @@ with demo:
     # 事件绑定
     submit_btn.click(respond, inputs=[msg, chatbot, system_prompt, temperature, top_p, max_tokens], outputs=[chatbot, msg])
     msg.submit(respond, inputs=[msg, chatbot, system_prompt, temperature, top_p, max_tokens], outputs=[chatbot, msg])
-    clear_btn.click(lambda: ([], ""), outputs=[chatbot, msg])
+    clear_btn.click(lambda: ([{"role": "system", "content": ""}], ""), outputs=[chatbot, msg])
 
 # ============================================================
 # 启动应用
