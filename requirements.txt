@@ -1,3 +1,7 @@
+# Web 界面依赖
+gradio>=4.0.0
+
+# 模型推理依赖
 transformers>=4.51.0
 datasets>=3.0.0
 peft>=0.15.0
